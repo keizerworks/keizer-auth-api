@@ -1,9 +1,9 @@
 package server
 
 import (
-	"github.com/gofiber/fiber/v2"
-
 	"keizer-auth-api/internal/database"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type FiberServer struct {
@@ -18,7 +18,6 @@ func New() *FiberServer {
 			ServerHeader: "keizer-auth-api",
 			AppName:      "keizer-auth-api",
 		}),
-
 		db: database.New(),
 	}
 
