@@ -3,12 +3,12 @@ package database
 import (
 	"context"
 	"fmt"
+	"keizer-auth-api/internal/models"
 	"log"
 	"os"
 	"strconv"
 	"time"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -24,6 +24,8 @@ type Service interface {
 	// It returns an error if the connection cannot be closed.
 	Close() error
 }
+
+var gormDB *gorm.DB
 
 type service struct {
 	db *gorm.DB
@@ -53,7 +55,8 @@ func New() Service {
 		port,
 	)
 
-	gormDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+	var err error
+	gormDB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 		SkipDefaultTransaction: true,
 		DisableAutomaticPing:   true,
 	})
@@ -61,11 +64,21 @@ func New() Service {
 		log.Fatal(err)
 	}
 
+	autoMigrate(gormDB)
+
 	dbInstance = &service{
 		db: gormDB,
 	}
 
 	return dbInstance
+}
+
+func GetDB() *gorm.DB {
+	return gormDB
+}
+
+func autoMigrate(db *gorm.DB) error {
+	return db.AutoMigrate(&models.User{})
 }
 
 // Health checks the health of the database connection by pinging the database.
